@@ -26,10 +26,10 @@ export type MachineApi = {
 }
 
 export type MachineInfoDisplay = {
-    machineCode: string,
+    machineId: string,
+    code: string,
     clubName: string,
-    tenantName: string,
-    attendant: string,
-    state: string,
-    machineId: string
+    toaSerialNumber: string,
+    terminalId: string,
+    smartFridgeId: string
 }

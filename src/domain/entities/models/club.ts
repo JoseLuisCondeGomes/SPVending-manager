@@ -24,7 +24,7 @@ export type ClubApi = {
     remark:string
     tenantEntityName:string
     tenantId: string,
-    userManagers:[]
+    userManagers: string[]
 }
 
 export type ClubInfoDisplay = {

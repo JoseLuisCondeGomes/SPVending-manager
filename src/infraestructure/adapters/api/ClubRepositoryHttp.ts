@@ -4,16 +4,29 @@ import { API_PREFIX, BASE_URL_SERVER, PATH_PREFIX } from "../../../utilities/def
 import { mapClubToApi } from "../../mappers/ToApi/ClubMapperToApi";
 import { authHandler } from "../Auth/AuthHandler";
 import { ClubApiResponse } from "../../../domain/entities/api-models/apiResponse";
+import { DEMO_MODE } from "../../../utilities/defines/demo";
+import {
+    addDemoClub,
+    deleteDemoClub,
+    findDemoClub,
+    getDemoClubList,
+    getDemoClubOptions,
+    modifyDemoClub
+} from "../../demo/demoStore";
 
 export class ClubRepositoryHttp implements ClubRepository {
     private BASEURL = BASE_URL_SERVER + API_PREFIX + PATH_PREFIX.clubPath;
 
     async findClubByUuid(clubUuid: string): Promise<ClubApi | null> {
+        if (DEMO_MODE) return findDemoClub(clubUuid);
+
         const response = await authHandler(`${this.BASEURL}/${clubUuid}`, { credentials: "include" });
         return response;
     }
 
     async getAllClubs(page: number): Promise<ClubApiResponse> {
+        if (DEMO_MODE) return getDemoClubList();
+
         const response = await fetch(`${this.BASEURL}?page=${page}`, { credentials: "include" });
         if (response.ok) return await response.json();
         if (response.status === 401) throw new Error(`${response.status}`);
@@ -22,6 +35,8 @@ export class ClubRepositoryHttp implements ClubRepository {
     }
 
     async addClub(club: Omit<Club, "clubId" | "numberOfMachines">): Promise<void> {
+        if (DEMO_MODE) return addDemoClub(club);
+
         const body = mapClubToApi(club);
         const response = await authHandler(
             this.BASEURL,
@@ -36,6 +51,8 @@ export class ClubRepositoryHttp implements ClubRepository {
     }
 
     async modifyClub(club: Omit<Club, "numberOfMachines">): Promise<void> {
+        if (DEMO_MODE) return modifyDemoClub(club);
+
         const body = mapClubToApi(club);
         const response = await authHandler(
             this.BASEURL + `/${club.clubId}`,
@@ -50,6 +67,8 @@ export class ClubRepositoryHttp implements ClubRepository {
     }
 
     async deleteClub(uuid: string): Promise<void> {
+        if (DEMO_MODE) return deleteDemoClub(uuid);
+
         const response = await authHandler(
             `${this.BASEURL}/${uuid}`,
             {
@@ -60,6 +79,8 @@ export class ClubRepositoryHttp implements ClubRepository {
     }
 
     async getClubOptions(): Promise<ClubOption[]> {
+        if (DEMO_MODE) return getDemoClubOptions();
+
         const response = await authHandler(`${this.BASEURL}/${PATH_PREFIX.potentialTenants}`, { credentials: "include" });
         return response;
     }

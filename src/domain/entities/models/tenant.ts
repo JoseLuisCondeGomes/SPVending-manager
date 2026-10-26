@@ -19,7 +19,7 @@ export type TenantApi = {
     email: string,
     remark: string,
     micronId: string,
-    managers: []
+    managers: string[]
 }
 
 export type TenantInfoDisplay = {

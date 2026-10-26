@@ -4,16 +4,28 @@ import { API_PREFIX, BASE_URL_SERVER, PATH_PREFIX } from "../../../utilities/def
 import { mapMachineToApi } from "../../mappers/ToApi/MachineMapperToApi";
 import { authHandler } from "../Auth/AuthHandler";
 import { MachineApiResponse } from "../../../domain/entities/api-models/apiResponse";
+import { DEMO_MODE } from "../../../utilities/defines/demo";
+import {
+    addDemoMachine,
+    deleteDemoMachine,
+    findDemoMachine,
+    getDemoMachineList,
+    modifyDemoMachine
+} from "../../demo/demoStore";
 
 export class MachineRepositoryHttp implements MachineRepository{
     private BASEURL = BASE_URL_SERVER + API_PREFIX + PATH_PREFIX.machinesPath;
 
     async findMachineByUuid(machineUuid: string): Promise<MachineApi | null> {
+        if (DEMO_MODE) return findDemoMachine(machineUuid);
+
         const response = await authHandler(`${this.BASEURL}/${machineUuid}`, {credentials: "include"});
         return await response;
     }
 
     async getAllMachines(page:number): Promise<MachineApiResponse> {
+        if (DEMO_MODE) return getDemoMachineList();
+
         const response = await fetch(`${this.BASEURL}?page=${page}`, {credentials: "include"});
         if (response.ok) return await response.json();
         if (response.status === 401) throw new Error(`${response.status}`);
@@ -22,6 +34,8 @@ export class MachineRepositoryHttp implements MachineRepository{
     }
 
     async addMachine(machine: Omit<Machine, "machineId" | "state">): Promise<void> {
+        if (DEMO_MODE) return addDemoMachine(machine);
+
         const body = mapMachineToApi(machine);
         const response = await authHandler(
             this.BASEURL,
@@ -36,6 +50,8 @@ export class MachineRepositoryHttp implements MachineRepository{
     }
 
     async modifyMachine(machine: Omit<Machine, "state">): Promise<void> {
+        if (DEMO_MODE) return modifyDemoMachine(machine);
+
         const body = mapMachineToApi(machine);
         const response = await authHandler(
             this.BASEURL+`/${machine.machineId}`,
@@ -50,6 +66,8 @@ export class MachineRepositoryHttp implements MachineRepository{
     }
 
     async deleteMachine(uuid: string): Promise<void> {
+        if (DEMO_MODE) return deleteDemoMachine(uuid);
+
         const response = await authHandler(
             `${this.BASEURL}/${uuid}`,
             {

@@ -57,7 +57,7 @@ export const infoDisplayMachines = {
         header: "Club"
     },
     column3: {
-        field: "toSerialNumber",
+        field: "toaSerialNumber",
         header: "Terminal Serial Number"
     },
     column4: {

@@ -4,16 +4,28 @@ import { API_PREFIX, BASE_URL_SERVER, PATH_PREFIX } from "../../../utilities/def
 import { mapUserToApi } from "../../mappers/ToApi/UserMapperToApi";
 import { authHandler } from "../Auth/AuthHandler";
 import { UserApiResponse } from "../../../domain/entities/api-models/apiResponse";
+import { DEMO_MODE } from "../../../utilities/defines/demo";
+import {
+    addDemoUser,
+    deleteDemoUser,
+    findDemoUser,
+    getDemoUserList,
+    modifyDemoUser
+} from "../../demo/demoStore";
 
 export class UserRepositoryHttp implements UserRepository {
     private BASEURL = BASE_URL_SERVER + API_PREFIX + PATH_PREFIX.usersPath;
 
     async findUserByUuid(userUuid: string): Promise<UserApi | null> {
+        if (DEMO_MODE) return findDemoUser(userUuid);
+
         const response = await authHandler(`${this.BASEURL}/${userUuid}`, {credentials: "include"});
         return await response;
     }
 
     async getAllUsers(page:number): Promise<UserApiResponse> {
+        if (DEMO_MODE) return getDemoUserList();
+
         const response = await fetch(`${this.BASEURL}?page=${page}`, {credentials: "include"});
         if (response.ok) return await response.json();
         if (response.status === 401) throw new Error(`${response.status}`);
@@ -22,6 +34,8 @@ export class UserRepositoryHttp implements UserRepository {
     }
 
     async addUser(user: Omit<User, "userId" | "clubName">): Promise<void> {
+        if (DEMO_MODE) return addDemoUser(user);
+
         const body = mapUserToApi(user);
         const response = await authHandler(
             this.BASEURL,
@@ -36,6 +50,8 @@ export class UserRepositoryHttp implements UserRepository {
     }
 
     async modifyUser(user: User): Promise<void> {
+        if (DEMO_MODE) return modifyDemoUser(user);
+
         const body = mapUserToApi(user);
         const response = await authHandler(
             this.BASEURL+`/${user.userId}`,
@@ -50,6 +66,8 @@ export class UserRepositoryHttp implements UserRepository {
     }
 
     async deleteUser(userUuid: string): Promise<void> {
+        if (DEMO_MODE) return deleteDemoUser(userUuid);
+
         const response = await authHandler(
             `${this.BASEURL}/${userUuid}`,
             {
